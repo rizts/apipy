@@ -241,7 +241,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-Risy - [@rizts](https://linkedin.com/in/rizts)
+Risdy - [@rizts](https://linkedin.com/in/rizts)
 
 Project Link: [https://github.com/rizts/apipy](https://github.com/rizts/apipy)
 
