@@ -150,12 +150,12 @@ Response:
   "status": "success",
   "data": [
     {
-      "nama": "Tamarind Herbal Medicine",
+      "name": "Tamarind Herbal Medicine",
       "category": "Traditional Drinks",
       "price": 15000.0
     },
     {
-      "nama": "Ginger Herbal Medicine",
+      "name": "Ginger Herbal Medicine",
       "category": "Traditional Drinks",
       "price": 12000.0
     }
@@ -168,7 +168,7 @@ Response:
 Request Body:
 ```json
 {
-  "nama": "Turmeric Herbal Medicine",
+  "name": "Turmeric Herbal Medicine",
   "category": "Traditional Drinks",
   "price": 18000.0
 }
@@ -179,7 +179,7 @@ Response:
 {
   "status": "success",
   "data": {
-    "nama": "Turmeric Herbal Medicine",
+    "name": "Turmeric Herbal Medicine",
     "category": "Traditional Drinks",
     "price": 18000.0
   }
@@ -200,7 +200,7 @@ Handles HTTP requests and defines API endpoints. Each router focuses on a specif
 Defines Pydantic models for request/response validation. This ensures data integrity and provides automatic type checking.
 
 **Product Schema:**
-- `nama`: Product name (string)
+- `name`: Product name (string)
 - `category`: Product category (string)
 - `price`: Product price in IDR (float)
 
