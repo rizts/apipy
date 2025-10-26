@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 class ProductBase(BaseModel):
     name: str = Field(..., example="Tamarind Herbal Medicine")
@@ -17,3 +18,5 @@ class ProductResponse(ProductBase):
 
     class Config:
         orm_mode = True
+
+Product = ProductResponse

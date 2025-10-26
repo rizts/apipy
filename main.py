@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal, engine
-from models import Base
-import crud, schemas, os, shutil, uuid
+from app import crud, schemas
+from app.database import Base, SessionLocal, engine
+import os, shutil, uuid
 from fastapi.staticfiles import StaticFiles
 import glob
 
@@ -42,7 +42,7 @@ def save_upload_file(upload_file: UploadFile, upload_dir: str) -> str:
     return file_path
 
 
-@app.post("/products/", response_model=schemas.Product)
+@app.post("/products/", response_model=schemas.ProductResponse)
 def create_product(
     name: str = Form(...),
     category: str = Form(None),
@@ -63,7 +63,7 @@ def create_product(
     return product
 
 
-@app.get("/products/", response_model=list[schemas.Product])
+@app.get("/products/", response_model=list[schemas.ProductResponse])
 def list_products(skip: int = 0, limit: int = 10, search: str = None, db: Session = Depends(get_db)):
     products = crud.list_products(db, skip=skip, limit=limit, search=search)
     for p in products:
@@ -72,7 +72,7 @@ def list_products(skip: int = 0, limit: int = 10, search: str = None, db: Sessio
     return products
 
 
-@app.get("/products/{product_id}", response_model=schemas.Product)
+@app.get("/products/{product_id}", response_model=schemas.ProductResponse)
 def get_product(product_id: int, db: Session = Depends(get_db)):
     product = crud.get_product(db, product_id)
     if not product:
@@ -82,11 +82,11 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     return product
 
 
-@app.put("/products/{product_id}", response_model=schemas.Product)
+@app.put("/products/{product_id}", response_model=schemas.ProductResponse)
 def update_product(
     product_id: int,
     name: str = Form(...),
-    description: str = Form(None),
+    category: str = Form(None),
     price: float = Form(...),
     file: UploadFile = File(None),
     db: Session = Depends(get_db),
@@ -106,7 +106,7 @@ def update_product(
         # Store new file
         image_path = save_upload_file(file, UPLOAD_DIR)
 
-    product = crud.update_product(db, product_id, name, description, price, image_path)
+    product = crud.update_product(db, product_id, name, category, price, image_path)
 
     if product.image_path:
         product.image_path = f"/uploads/{os.path.basename(product.image_path)}"
@@ -126,7 +126,7 @@ def cleanup_uploads(db: Session = Depends(get_db)):
     Delete related files in uploads folder.
     """
     # Get all products image_path produk in database
-    products = db.query(crud.Product).all()
+    products = db.query(crud.ProductResponse).all()
     used_files = set()
     for p in products:
         if p.image_path:
