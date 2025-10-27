@@ -1,12 +1,16 @@
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from app import crud, schemas
-from app.database import Base, SessionLocal, engine
+from app.database import Base, SessionLocal, engine, get_db
 import os, shutil, uuid
 from fastapi.staticfiles import StaticFiles
 import glob
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException, status
+from auth import verify_password, create_access_token, decode_access_token, get_current_admin
+from app.models import User
 
 Base.metadata.create_all(bind=engine)
 
@@ -17,6 +21,31 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token invalid")
+    username = payload.get("sub")
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+def get_current_admin(current_user = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
+# Token endpoint
+@app.post("/token", response_model=schemas.Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Username atau password incorrect")
+    token = create_access_token({"sub": user.username})
+    return {"access_token": token, "token_type": "bearer"}
 
 def get_db():
     db = SessionLocal()
@@ -51,6 +80,7 @@ def create_product(
     price: float = Form(...),
     file: UploadFile = File(None),
     db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin)
 ):
     image_path = None
     if file:
@@ -92,6 +122,7 @@ def update_product(
     price: float = Form(...),
     file: UploadFile = File(None),
     db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin)
 ):
     product = crud.get_product(db, product_id)
     if not product:
@@ -117,13 +148,17 @@ def update_product(
 
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_admin)
+):
     crud.delete_product(db, product_id)
     return {"message": "Deleted successfully"}
 
 
 @app.post("/cleanup-uploads")
-def cleanup_uploads(db: Session = Depends(get_db)):
+def cleanup_uploads(db: Session = Depends(get_db), current_user = Depends(get_current_admin)):
     """
     Delete related files in uploads folder.
     """
