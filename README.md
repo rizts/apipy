@@ -138,6 +138,24 @@ These interfaces allow you to test the API endpoints directly from your browser.
 
 ## 🛣️ API Endpoints
 
+### Auth token
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/token` | Request auth token |
+
+### Example Request
+
+**POST** `/token`
+
+Response:
+```json
+{
+  "access_token": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "token_type": "bearer"
+}
+```
+
 ### Products
 
 | Method | Endpoint | Description |
@@ -155,21 +173,18 @@ These interfaces allow you to test the API endpoints directly from your browser.
 
 Response:
 ```json
-{
-  "status": "success",
-  "data": [
-    {
+[
+  {
       "name": "Tamarind Herbal Medicine",
       "category": "Traditional Drinks",
       "price": 15000.0
-    },
-    {
-      "name": "Ginger Herbal Medicine",
-      "category": "Traditional Drinks",
-      "price": 12000.0
-    }
-  ]
-}
+  },
+  {
+    "name": "Ginger Herbal Medicine",
+    "category": "Traditional Drinks",
+    "price": 12000.0
+  }
+]
 ```
 
 **POST** `/products`
@@ -186,12 +201,49 @@ Request Body:
 Response:
 ```json
 {
-  "status": "success",
-  "data": {
-    "name": "Turmeric Herbal Medicine",
-    "category": "Traditional Drinks",
-    "price": 18000.0
-  }
+  "name": "Turmeric Herbal Medicine",
+  "category": "Traditional Drinks",
+  "price": 18000.0
+}
+```
+
+**GET** `/products/{product_id}`
+
+Response:
+```json
+{
+  "name": "Turmeric Herbal Medicine",
+  "category": "Traditional Drinks",
+  "price": 18000.0
+}
+```
+
+**PUT** `/products/{product_id}`
+
+Request Body:
+```json
+{
+  "name": "Turmeric Herbal Medicine",
+  "category": "Traditional Drinks",
+  "price": 18000.0
+}
+```
+
+Response:
+```json
+{
+  "name": "Turmeric Herbal Medicine",
+  "category": "Traditional Drinks",
+  "price": 18000.0
+}
+```
+
+**DELETE** `/products/{product_id}`
+
+Response:
+```json
+{
+  "message": "Deleted successfully"
 }
 ```
 
