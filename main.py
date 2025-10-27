@@ -5,6 +5,8 @@ from app.database import Base, SessionLocal, engine
 import os, shutil, uuid
 from fastapi.staticfiles import StaticFiles
 import glob
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 Base.metadata.create_all(bind=engine)
 
@@ -143,3 +145,33 @@ def cleanup_uploads(db: Session = Depends(get_db)):
             deleted_files.append(filename)
 
     return {"deleted_files": deleted_files, "message": "Cleanup finishd"}
+
+
+# Scheduler background
+scheduler = BackgroundScheduler()
+
+def scheduled_cleanup():
+    db = next(get_db())  # Get session db
+    products = db.query(crud.Product).all()
+    used_files = set()
+    for p in products:
+        if p.image_path:
+            used_files.add(os.path.basename(p.image_path))
+
+    all_files = glob.glob(os.path.join(UPLOAD_DIR, "*"))
+    deleted_files = []
+    for file_path in all_files:
+        filename = os.path.basename(file_path)
+        if filename not in used_files:
+            os.remove(file_path)
+            deleted_files.append(filename)
+
+    if deleted_files:
+        print(f"[Cleanup] Deleted files: {deleted_files}")
+
+# Start cleanup every 00:00
+scheduler.add_job(scheduled_cleanup, 'cron', hour=0, minute=0)
+scheduler.start()
+
+# Stop scheduler when app shutdown
+atexit.register(lambda: scheduler.shutdown())
