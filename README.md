@@ -38,19 +38,28 @@ This project demonstrates how to build a clean and structured REST API using Fas
 ```
 apipy/
 ├── app/
+│   ├── crud.py
+│   ├── database.py
 │   ├── __init__.py
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── product_model.py      # Product data models
+│   │   └── product_model.py       # Product data models
+│   │   └── user_model.py          # User data models
 │   ├── routers/
 │   │   ├── __init__.py
 │   │   └── product.py             # Product API routes
 │   └── schemas/
 │       ├── __init__.py
-│       └── product_schema.py      # Pydantic schemas for validation
+│       └── product_schema.py      # Pydantic product schemas for validation
+│       └── user_schema.py         # Pydantic user schemas for validation
+├── auth.py                        # Application auth middleware
 ├── LICENSE
 ├── main.py                        # Application entry point
-└── README.md
+├── product.db
+├── README.md
+├── requirements.txt
+├── seed.py                        # Application seeder
+└── uploads/
 ```
 
 ---
